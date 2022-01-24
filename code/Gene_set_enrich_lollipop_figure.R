@@ -17,4 +17,4 @@ gg_pop<-gene_set_enrich_tbl %>%
   mutate(Gene.Set=fct_reorder(Gene.Set,-log10(FDR))) %>% 
   ggplot(.,aes(-log10(FDR),Gene.Set,size=OR))+
   geom_point()+theme_minimal()
-ggsave("~/Documents/multires_bhicect/weeklies/group_meeting/group_meeting_12_2021/img/GM12878_hub_mres_GOBP_lilopop.svg")
+ggsave("~/Documents/multires_bhicect/weeklies/IFI_meeting/img/HMEC_hub_mres_GOBP_lilopop.svg")
