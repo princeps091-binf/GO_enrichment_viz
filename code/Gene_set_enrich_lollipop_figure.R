@@ -3,7 +3,7 @@ renv::install("svglite")
 
 library(tidyverse)
 library(svglite)
-gene_set_enrich_tbl_file<-"./data/hub_mres_GM12878_CAGE_rich_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl_file<-"./data/hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda"
 
 gene_set_enrich_tbl<-get(load(gene_set_enrich_tbl_file))
 tmp_obj<-names(mget(load(gene_set_enrich_tbl_file)))

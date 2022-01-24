@@ -13,7 +13,7 @@ res_set <- c('1Mb','500kb','100kb','50kb','10kb','5kb')
 res_num <- c(1e6,5e5,1e5,5e4,1e4,5e3)
 names(res_num)<-res_set
 #-------------------------------------------------------------------
-gene_GRange_file<-"./data/CAGE_gene_GRange.Rda"
+gene_GRange_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
 gene_set1_file<-"./data/GOBP_gene_set_l.Rda"
 gene_set2_file<-"./data/Hallmark_gene_set_l.Rda"
 gene_set3_file<-"~/Documents/multires_bhicect/data/epi_data/hg19_ENST_to_ENSG.txt"

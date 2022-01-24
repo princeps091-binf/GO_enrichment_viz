@@ -9,8 +9,8 @@ res_set <- c('1Mb','500kb','100kb','50kb','10kb','5kb')
 res_num <- c(1e6,5e5,1e5,5e4,1e4,5e3)
 names(res_num)<-res_set
 #-------------------------------------------------------------------
-cage_coord_file<-"~/Documents/multires_bhicect/data/epi_data/H1/CAGE/H1_coord_df.Rda"
-out_file<-"./data/CAGE_H1_gene_GRange.Rda"
+cage_coord_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/CAGE_tss_coord_HMEC_tbl.Rda"
+out_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
 
 cage_tbl<-get(load(cage_coord_file))
 tmp_obj<-names(mget(load(cage_coord_file)))

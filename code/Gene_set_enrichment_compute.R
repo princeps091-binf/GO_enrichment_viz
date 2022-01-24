@@ -1,7 +1,7 @@
 renv::install("tidyverse")
 library(tidyverse)
 
-background_gene_file<-"./data/CAGE_gene_GRange.Rda"
+background_gene_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
 foreground_gene_file<-"./data/mres_HMEC_hub_ENSG_tbl.Rda"
 out_file<-"./data/hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda"
 
