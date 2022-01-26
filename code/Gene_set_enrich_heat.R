@@ -15,7 +15,7 @@ res_num <- c(1e6,5e5,1e5,5e4,1e4,5e3)
 names(res_num)<-res_set
 #-------------------------------------------------------------------
 tbl_folder<-"./data/"
-foi<-c("hub_10kb_GM12878_CAGE_rich_GOBP_enrich_tbl.Rda","hub_mres_GM12878_CAGE_rich_GOBP_enrich_tbl.Rda","TAD_GM12878_CAGE_rich_GOBP_enrich_tbl.Rda")
+foi<-c("hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","hub_50kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","hub_5kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda")
 
 cl_set_combo_tbl<-do.call(bind_rows,lapply (foi, function(cl_file){
   #cl_set<-unlist(lapply(strsplit(cl_file,split="_"),'[',1))
@@ -23,9 +23,12 @@ cl_set_combo_tbl<-do.call(bind_rows,lapply (foi, function(cl_file){
   
   path_tbl<-get(load(paste0(tbl_folder,cl_file)))
   #load(cl_file)
-  return(path_tbl %>%arrange(FDR)%>%filter(FDR<0.01)%>%slice_head(n=15))
+  return(path_tbl %>%arrange(desc(OR))%>%filter(FDR<=0.01)%>%slice_head(n=15))
   
 }))%>%distinct(Gene.Set)
+cl_file<-"hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda"
+cl_set_combo_tbl<-get(load(paste0(tbl_folder,cl_file))) %>% 
+                    arrange(desc(OR))%>%filter(FDR<=0.01)%>%slice_head(n=15)
 
 hm_gene_set<-as_tibble(read.table("~/Documents/multires_bhicect/data/epi_data/Gene_annotation/c5.all.v7.3.entrez.gmt",header = F,sep = "\t",fill=T))
 
@@ -35,13 +38,15 @@ cl_set_combo_tbl<-cl_set_combo_tbl %>%   left_join(.,hm_gene_set%>%dplyr::select
 
 tmp_tbl_l<-lapply(cl_set_combo_tbl$V2,function(x){
   test_term<-read_html(x)
-  tbl_l<-test_term%>%html_elements("table")
-  return(tbl_l[[2]] )
+  tbl_l<-test_term%>%html_elements("tr")
+  tmp_chr<-as.character(tbl_l[grep("^<tr>\n<th>Exact source</th>\n",test_term%>%html_elements("tr"))])
+  if(length(tmp_chr)<1){return(NA)}else {
+    return(tmp_chr %>% str_extract(.,"GO:[0-9]+"))
+  }
 })
-tmp_tbl_l<-lapply(tmp_tbl_l,function(x){
-  return(x %>% html_table()%>%filter(X1 == "Exact source")%>%dplyr::select(X2)) 
-})
-cl_set_combo_tbl<-cl_set_combo_tbl%>%mutate(GO.ID=unlist(do.call(bind_rows,tmp_tbl_l)))
+cl_set_combo_tbl<-cl_set_combo_tbl%>%
+  mutate(GO.ID=unlist(tmp_tbl_l)) %>% 
+  filter(!(is.na(GO.ID))) 
 
 simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
                                 orgdb="org.Hs.eg.db",
@@ -76,7 +81,7 @@ gg_heat<-cl_set_FDR_tbl %>%
   mutate(Gene.Set=fct_relevel(Gene.Set,id_gene_set_map[names(new_order)]),Gene.Set2=fct_relevel(Gene.Set2,id_gene_set_map2[names(new_order)]))%>%
   #mutate(set=fct_relevel(set,c("hub_50kb","tad_GOBP","inter_GOBP","hub_ex","tad_ex")))%>%
   mutate(OR=ifelse(FDR>0.01,NA,OR))%>%
-  ggplot(.,aes(set,Gene.Set2,fill=OR))+geom_tile()+scale_fill_viridis_c()+ ylab("Gene Set")+
+  ggplot(.,aes(set,Gene.Set2,fill=log10(OR)))+geom_tile()+scale_fill_viridis_c()+ ylab("Gene Set")+
   theme(axis.text.y = element_text(size=10))+theme_minimal()
 gg_heat
-ggsave("~/Documents/multires_bhicect/weeklies/group_meeting/group_meeting_12_2021/img/GM12878_tad_GOBP_heat.svg",gg_heat,width = 30,height=20, units = "cm")
+ggsave("~/Documents/multires_bhicect/weeklies/IFI_meeting/img/HMEC_GOBP_heat.svg",gg_heat,width = 30,height=20, units = "cm")

@@ -2,8 +2,8 @@ renv::install("tidyverse")
 library(tidyverse)
 
 background_gene_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
-foreground_gene_file<-"./data/mres_HMEC_hub_ENSG_tbl.Rda"
-out_file<-"./data/hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda"
+foreground_gene_file<-"./data/HMEC_50kb_hub_ENSG_tbl.Rda"
+out_file<-"./data/hub_50kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda"
 
 gene_conv_tbl_file<-"./data/gene_name_conv_tbl.Rda"
 
@@ -69,6 +69,6 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 
 
 path_tbl<-GO_set_enrich_fn(foreground_gene_vec,background_gene_vec,Gene_set_l)
-path_tbl %>% arrange(FDR)
+path_tbl %>% filter(FDR<=0.01) %>% arrange(FDR) %>% arrange(desc(OR))
 save(path_tbl,file=out_file)
 
