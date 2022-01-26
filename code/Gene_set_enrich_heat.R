@@ -81,7 +81,7 @@ gg_heat<-cl_set_FDR_tbl %>%
   mutate(Gene.Set=fct_relevel(Gene.Set,id_gene_set_map[names(new_order)]),Gene.Set2=fct_relevel(Gene.Set2,id_gene_set_map2[names(new_order)]))%>%
   #mutate(set=fct_relevel(set,c("hub_50kb","tad_GOBP","inter_GOBP","hub_ex","tad_ex")))%>%
   mutate(OR=ifelse(FDR>0.01,NA,OR))%>%
-  ggplot(.,aes(set,Gene.Set2,fill=log10(OR)))+geom_tile()+scale_fill_viridis_c()+ ylab("Gene Set")+
+  ggplot(.,aes(set,Gene.Set2,fill=OR))+geom_tile()+scale_fill_viridis_c()+ ylab("Gene Set")+
   theme(axis.text.y = element_text(size=10))+theme_minimal()
 gg_heat
 ggsave("~/Documents/multires_bhicect/weeklies/IFI_meeting/img/HMEC_GOBP_heat.svg",gg_heat,width = 30,height=20, units = "cm")
