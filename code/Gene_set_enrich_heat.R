@@ -15,7 +15,7 @@ res_num <- c(1e6,5e5,1e5,5e4,1e4,5e3)
 names(res_num)<-res_set
 #-------------------------------------------------------------------
 tbl_folder<-"./data/"
-foi<-c("hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","hub_50kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","hub_5kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda")
+foi<-c("hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","hub_50kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","hub_5kb_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda","HMEC_CAGE_active_GOBP_enrich_tbl.Rda")
 
 cl_set_combo_tbl<-do.call(bind_rows,lapply (foi, function(cl_file){
   #cl_set<-unlist(lapply(strsplit(cl_file,split="_"),'[',1))
