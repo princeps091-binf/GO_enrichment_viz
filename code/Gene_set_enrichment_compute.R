@@ -1,9 +1,10 @@
 renv::install("tidyverse")
 library(tidyverse)
 
-background_gene_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
-foreground_gene_file<-"./data/HMEC_50kb_hub_ENSG_tbl.Rda"
-out_file<-"./data/HMEC_CAGE_active_GOBP_enrich_tbl.Rda"
+background_gene_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
+foreground_gene_file<-"./data/GM12878_5kb_hub_ENSG_tbl.Rda"
+
+out_file<-"./data/hub_5kb_GM12878_CAGE_GOBP_enrich_tbl.Rda"
 
 gene_conv_tbl_file<-"./data/gene_name_conv_tbl.Rda"
 
@@ -42,7 +43,7 @@ background_gene_vec<-gene_conv_tbl%>%
   filter(ensembl_gene_id %in% cage_active_gene)%>%
   distinct(entrezgene_id) %>% unlist %>% as.character
 
-hg19_vec<-gene_conv_tbl %>% distinct(entrezgene_id) %>% unlist
+#hg19_vec<-gene_conv_tbl %>% distinct(entrezgene_id) %>% unlist
 GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
   fn_env<-environment()
   
@@ -68,7 +69,7 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 }
 
 
-path_tbl<-GO_set_enrich_fn(background_gene_vec,hg19_vec,Gene_set_l)
+path_tbl<-GO_set_enrich_fn(foreground_gene_vec,background_gene_vec,Gene_set_l)
 path_tbl %>% filter(FDR<=0.01) %>% arrange(FDR) %>% arrange(desc(OR))
 save(path_tbl,file=out_file)
 

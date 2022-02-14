@@ -11,13 +11,13 @@ res_set <- c('1Mb','500kb','100kb','50kb','10kb','5kb')
 res_num <- c(1e6,5e5,1e5,5e4,1e4,5e3)
 names(res_num)<-res_set
 #-------------------------------------------------------------------
-cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/HMEC_union_dagger_tbl.Rda"
-cl_spec_res_folder<-"~/Documents/multires_bhicect/data/HMEC/spec_res/"
+cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/GM12878_union_dagger_tbl.Rda"
+cl_spec_res_folder<-"~/Documents/multires_bhicect/data/GM12878/spec_res/"
 
-gene_GRange_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
+gene_GRange_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
 cl_res<-"50kb"
 
-out_file<-paste0("./data/HMEC_",cl_res,"_hub_ENSG_tbl.Rda")
+out_file<-paste0("./data/GM12878_",cl_res,"_hub_ENSG_tbl.Rda")
 
 cl_tbl<-get(load(cl_tbl_file))
 tmp_obj<-names(mget(load(cl_tbl_file)))
@@ -54,5 +54,5 @@ for (chromo in chr_set){
 grange_tbl<-do.call(bind_rows,chr_res_l)
 cl_GRange<-GenomicRanges::reduce(unlist(GRangesList(grange_tbl$Grange)))
 ENSG_vec<-unique(unlist(gene_GRange@elementMetadata$ENSG[unique(subjectHits(findOverlaps(cl_GRange,gene_GRange)))]))
-hub_gene_tbl<-tibble(cl="HMEC_hub",ENSG=list(ENSG_vec))
+hub_gene_tbl<-tibble(cl=paste0("hub_",cl_res),ENSG=list(ENSG_vec))
 save(hub_gene_tbl,file=out_file)
