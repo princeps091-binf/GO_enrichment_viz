@@ -1,0 +1,87 @@
+library(tidyverse)
+library(rvest)
+library(rrvgo)
+library(org.Hs.eg.db)
+library(seriation)
+library(viridis)
+library(ggridges)
+gene_set_enrich_tbl_file<-"./data/hub_5kb_GM12878_CAGE_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl<-get(load(gene_set_enrich_tbl_file))
+tmp_obj<-names(mget(load(gene_set_enrich_tbl_file)))
+rm(list=tmp_obj)
+rm(tmp_obj)
+
+gene_set_enrich_tbl %>% filter(FDR<=0.01) %>% arrange(FDR)
+
+
+cl_set_combo_tbl<-gene_set_enrich_tbl %>% 
+  filter(FDR<=0.01)
+
+hm_gene_set<-as_tibble(read.table("~/Documents/multires_bhicect/data/epi_data/Gene_annotation/c5.all.v7.3.entrez.gmt",header = F,sep = "\t",fill=T))
+
+cl_set_combo_tbl<-cl_set_combo_tbl %>%   left_join(.,hm_gene_set%>%dplyr::select(V1,V2),by=c("Gene.Set" = "V1"))
+
+
+
+tmp_tbl_l<-lapply(cl_set_combo_tbl$V2,function(x){
+  test_term<-read_html(x)
+  tbl_l<-test_term%>%html_elements("tr")
+  tmp_chr<-as.character(tbl_l[grep("^<tr>\n<th>Exact source</th>\n",test_term%>%html_elements("tr"))])
+  if(length(tmp_chr)<1){return(NA)}else {
+    return(tmp_chr %>% str_extract(.,"GO:[0-9]+"))
+  }
+})
+cl_set_combo_tbl<-cl_set_combo_tbl%>%
+  mutate(GO.ID=unlist(tmp_tbl_l)) %>% 
+  filter(!(is.na(GO.ID))) 
+
+simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
+                                orgdb="org.Hs.eg.db",
+                                ont="BP",
+                                method="Resnik")
+
+library(seriation)
+d<-as.dist(1/(simMatrix+1e-3))
+order <- seriate(d,method = "HC")
+image(simMatrix[get_order(order),get_order(order)])
+
+library(igraph)
+main_sub_g<-graph_from_adjacency_matrix(simMatrix,mode = "undirected",weighted = T)
+louvain_sample_cluster<-cluster_louvain(main_sub_g)
+
+sample_comm<-unique(louvain_sample_cluster$membership)
+comm_edge_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
+  tmp_v<-V(main_sub_g)$name[which(cluster_louvain(main_sub_g)$membership==i)]
+  expand_grid(ego=tmp_v,alter=tmp_v) %>% mutate(x=i)
+}))
+tmp_mat<-matrix(0,nrow = nrow(simMatrix),ncol=ncol(simMatrix),dimnames = dimnames(simMatrix))
+tmp_mat[as.matrix(comm_edge_tbl[,1:2])]<-comm_edge_tbl$x
+image(tmp_mat[get_order(order),get_order(order)],col=plasma(9))
+
+sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
+  tmp_w<-E(induced_subgraph(main_sub_g,louvain_sample_cluster$names[which(louvain_sample_cluster$membership==i)]))$weight
+  return(tibble(GO.set=i,w=tmp_w))
+}))
+
+sim_tbl %>% 
+  ggplot(.,aes(x=w,y=as.factor(GO.set),fill=as.factor(GO.set)))+
+  geom_density_ridges(alpha=0.8)+
+  scale_fill_manual(breaks = c(0,sample_comm),values=plasma(9))
+
+cl_set_combo_tbl %>% 
+  inner_join(comm_edge_tbl %>% filter(x==6) %>% 
+  summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR)
+
+cl_set_combo_tbl %>% 
+  inner_join(comm_edge_tbl %>% group_by(x) %>% 
+               summarise(GO.ID=unique(c(ego,alter)))) %>% 
+  rename(set=x) %>% 
+  ggplot(.,aes(x=-log10(FDR),y=as.factor(set)))+
+  geom_density_ridges()
+
+cl_set_combo_tbl %>% 
+  inner_join(comm_edge_tbl %>% group_by(x) %>% 
+               summarise(GO.ID=unique(c(ego,alter)))) %>% 
+  rename(set=x) %>% 
+  ggplot(.,aes(x=OR,y=as.factor(set)))+
+  geom_density_ridges()
