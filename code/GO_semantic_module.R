@@ -63,14 +63,15 @@ sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
   return(tibble(GO.set=i,w=tmp_w))
 }))
 
+
+cl_set_combo_tbl %>% 
+  inner_join(comm_edge_tbl %>% filter(x==5) %>% 
+  summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR)
+
 sim_tbl %>% 
   ggplot(.,aes(x=w,y=as.factor(GO.set),fill=as.factor(GO.set)))+
   geom_density_ridges(alpha=0.8)+
   scale_fill_manual(breaks = c(0,sample_comm),values=plasma(9))
-
-cl_set_combo_tbl %>% 
-  inner_join(comm_edge_tbl %>% filter(x==6) %>% 
-  summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR)
 
 cl_set_combo_tbl %>% 
   inner_join(comm_edge_tbl %>% group_by(x) %>% 
@@ -85,3 +86,24 @@ cl_set_combo_tbl %>%
   rename(set=x) %>% 
   ggplot(.,aes(x=OR,y=as.factor(set)))+
   geom_density_ridges()
+#---------------------------------------------------
+# Examine overlap in gene content between semantic blocks
+semantic_module_content_tbl<-comm_edge_tbl %>% group_by(x) %>% 
+  summarise(GO.ID=list(unique(c(ego,alter)))) %>% 
+  dplyr::rename(sem.mod=x)
+
+sem_mod_gene_l<-lapply(semantic_module_content_tbl$GO.ID,function(i){
+  tmp_names<-cl_set_combo_tbl %>% filter(GO.ID %in% i) %>% dplyr::select(Gene.Set) %>% unlist
+  hm_gene_set %>% 
+    filter(V1 %in% tmp_names) %>% 
+    dplyr::select(-V2) %>% 
+    pivot_longer(!V1, names_to="gene.id",values_to = "entrez.id") %>% 
+    dplyr::select(-gene.id) %>% 
+    distinct(entrez.id) %>% unlist %>% as.character
+  
+  
+})
+
+library(UpSetR)
+names(sem_mod_gene_l)<-paste0("module.",1:length(sem_mod_gene_l))
+upset(fromList(sem_mod_gene_l),order.by = "freq")
