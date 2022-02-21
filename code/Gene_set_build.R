@@ -12,7 +12,10 @@ res_set <- c('1Mb','500kb','100kb','50kb','10kb','5kb')
 res_num <- c(1e6,5e5,1e5,5e4,1e4,5e3)
 names(res_num)<-res_set
 #-------------------------------------------------------------------
-gene_set_file<-"~/Documents/multires_bhicect/data/epi_data/Gene_annotation/h.all.v7.3.entrez.gmt"
+# Get current version of gene sets fro MSigDB websites:
+# http://www.gsea-msigdb.org/gsea/downloads.jsp
+
+gene_set_file<-"./data/MSigDB_tbl/h.all.v7.5.1.entrez.gmt"
 out_file<-"./data/Hallmark_gene_set_l.Rda"
 
 # Input and format gene sets of interest
