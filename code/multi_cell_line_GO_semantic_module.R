@@ -92,16 +92,16 @@ cl_shared_set_combo_tbl %>%
                summarise(GO.ID=unique(c(ego,alter)))) 
 #----------------------
 ## Examine how these different shared and enriched gene-set modules compare in terms of significance
-lapply(unique(comm_edge_tbl$x),function(comm){
+do.call(bind_rows,lapply(unique(comm_edge_tbl$x),function(comm){
   tmp_set<-cell_line_GO_tbl %>% 
     inner_join(.,cl_shared_set_combo_tbl%>%dplyr::select(GO.Set,GO.ID),by=c("Gene.Set" = "GO.Set")) %>% 
     inner_join(.,comm_edge_tbl %>% filter(x==comm) %>% 
                  summarise(GO.ID=unique(c(ego,alter))))
-  return(kruskal.test(-log10(FDR) ~ line, data = tmp_set)$p.value)  
-})
+  return(tibble(set=comm,pvalue=kruskal.test(-log10(FDR) ~ line, data = tmp_set)$p.value))  
+})) %>% filter(pvalue<0.05)
 tmp_set<-cell_line_GO_tbl %>% 
   inner_join(.,cl_shared_set_combo_tbl%>%dplyr::select(GO.Set,GO.ID),by=c("Gene.Set" = "GO.Set")) %>% 
-  inner_join(.,comm_edge_tbl %>% filter(x==7) %>% 
+  inner_join(.,comm_edge_tbl %>% filter(x==6) %>% 
                summarise(GO.ID=unique(c(ego,alter))))
 
 tmp_set%>% 
@@ -111,3 +111,6 @@ tmp_set %>% arrange(FDR)
 
 pairwise.wilcox.test(-log10(tmp_set$FDR), tmp_set$line,
                      p.adjust.method = "BH")
+
+tmp_set%>% 
+  ggplot(.,aes(-log10(FDR),y=1,color=line))+geom_point()
