@@ -23,11 +23,11 @@ Build_GRange_fn<-function(bin_set,res,chr,res_num){
   
 }
 #-------------------------------
-compound_mres_hub_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/HMEC_mres_coumpund_hub.Rda"
-pval_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/pval_tbl/CAGE_union_HMEC_pval_tbl.Rda"
-gene_GRange_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
+compound_mres_hub_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/GM12878_mres_coumpund_hub.Rda"
+pval_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/pval_tbl/CAGE_union_GM12878_pval_tbl.Rda"
+gene_GRange_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
 
-out_file<-paste0("./data/HMEC_compound_hub_ENSG_tbl.Rda")
+out_file<-paste0("./data/GM12878_compound_hub_ENSG_tbl.Rda")
 
 
 gene_GRange<-get_obj_in_fn(gene_GRange_file)
