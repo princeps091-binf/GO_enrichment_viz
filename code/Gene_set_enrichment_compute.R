@@ -1,35 +1,31 @@
-renv::install("tidyverse")
 library(tidyverse)
+#------------------------------
+get_obj_in_fn<-function(file){
+  tmp_tbl<-get(load(file))
+  tmp_obj<-names(mget(load(file)))
+  rm(list=tmp_obj)
+  rm(tmp_obj)
+  return(tmp_tbl)
+}
 
-background_gene_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
-foreground_gene_file<-"./data/GM12878_5kb_hub_ENSG_tbl.Rda"
+#------------------------------
+background_gene_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
+foreground_gene_file<-"./data/HMEC_compound_hub_ENSG_tbl.Rda"
 
-out_file<-"./data/hub_5kb_GM12878_CAGE_GOBP_enrich_tbl.Rda"
+out_file<-"./data/compound_hub_HMEC_CAGE_GOBP_enrich_tbl.Rda"
 
 gene_conv_tbl_file<-"./data/gene_name_conv_tbl.Rda"
 
 gene_set_file<-"./data/GOBP_gene_set_l.Rda"
 
 
-background_GRange<-get(load(background_gene_file))
-tmp_obj<-names(mget(load(background_gene_file)))
-rm(list=tmp_obj)
-rm(tmp_obj)
+background_GRange<-get_obj_in_fn(background_gene_file)
 
-foreground_gene_tbl<-get(load(foreground_gene_file))
-tmp_obj<-names(mget(load(foreground_gene_file)))
-rm(list=tmp_obj)
-rm(tmp_obj)
+foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file)
 
-gene_conv_tbl<-get(load(gene_conv_tbl_file))
-tmp_obj<-names(mget(load(gene_conv_tbl_file)))
-rm(list=tmp_obj)
-rm(tmp_obj)
+gene_conv_tbl<-get_obj_in_fn(gene_conv_tbl_file)
 
-Gene_set_l<-get(load(gene_set_file))
-tmp_obj<-names(mget(load(gene_set_file)))
-rm(list=tmp_obj)
-rm(tmp_obj)
+Gene_set_l<-get_obj_in_fn(gene_set_file)
 
 
 cage_active_gene<-unique(unlist(mcols(background_GRange)$ENSG))
