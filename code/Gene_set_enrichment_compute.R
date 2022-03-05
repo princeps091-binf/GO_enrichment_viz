@@ -9,10 +9,10 @@ get_obj_in_fn<-function(file){
 }
 
 #------------------------------
-background_gene_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
-foreground_gene_file<-"./data/GM12878_compound_hub_ENSG_tbl.Rda"
+background_gene_file<-"./data/CAGE_H1_gene_GRange.Rda"
+foreground_gene_file<-"./data/H1_5kb_stub_ENSG_tbl.Rda"
 
-out_file<-"./data/compound_hub_GM12878_CAGE_GOBP_enrich_tbl.Rda"
+out_file<-"./data/H1_5kb_stub_CAGE_GOBP_enrich_tbl.Rda"
 
 gene_conv_tbl_file<-"./data/gene_name_conv_tbl.Rda"
 

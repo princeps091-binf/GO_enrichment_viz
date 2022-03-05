@@ -15,15 +15,16 @@ get_obj_in_fn<-function(file){
   return(out_tbl)
 }
 #-------------------------------------------------------------------
-cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/candidate_compound_hub/HMEC_500kb_tss_compound_hub.Rda"
-cl_spec_res_folder<-"~/Documents/multires_bhicect/data/HMEC/spec_res/"
+cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/candidate_compound_hub/H1_hub_5kb_stub.Rda"
+cl_spec_res_folder<-"~/Documents/multires_bhicect/data/H1/Dekker/spec_res/"
 
-gene_GRange_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
+gene_GRange_file<-"./data/CAGE_H1_gene_GRange.Rda"
 
-out_file<-paste0("./data/HMEC_500kb_compound_hub_ENSG_tbl.Rda")
+out_file<-paste0("./data/H1_5kb_stub_ENSG_tbl.Rda")
 
 cl_tbl<-get_obj_in_fn(cl_tbl_file)
-
+cl_tbl<-cl_tbl %>% 
+  mutate(res=map_chr(hub.5kb,function(x){strsplit(x,split="_")[[1]][1]}))
 gene_GRange<-get_obj_in_fn(gene_GRange_file)
 
 #Build BHiCect GRange
@@ -33,7 +34,7 @@ names(chr_res_l)<-chr_set
 for (chromo in chr_set){
   message(chromo)
   load(paste0(cl_spec_res_folder,chromo,"_spec_res.Rda"))
-  chr_cl_tbl<-cl_tbl %>% filter(chr==chromo) %>% mutate(bins=chr_spec_res$cl_member[parent.hub])
+  chr_cl_tbl<-cl_tbl %>% filter(chr==chromo) %>% mutate(bins=chr_spec_res$cl_member[hub.5kb])
   plan(multisession, workers = 3)
   
   chr_cl_tbl<-chr_cl_tbl %>% mutate(GRange=future_pmap(list(chr,bins,res),function(chr,bins,res){
@@ -51,4 +52,5 @@ grange_tbl<-do.call(bind_rows,chr_res_l)
 cl_GRange<-GenomicRanges::reduce(unlist(GRangesList(grange_tbl$Grange)))
 ENSG_vec<-unique(unlist(gene_GRange@elementMetadata$ENSG[unique(subjectHits(findOverlaps(cl_GRange,gene_GRange)))]))
 hub_gene_tbl<-tibble(cl=paste0("hub"),ENSG=list(ENSG_vec))
+hub_gene_tbl
 save(hub_gene_tbl,file=out_file)
