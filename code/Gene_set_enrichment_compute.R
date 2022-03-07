@@ -9,10 +9,10 @@ get_obj_in_fn<-function(file){
 }
 
 #------------------------------
-background_gene_file<-"./data/CAGE_H1_gene_GRange.Rda"
-foreground_gene_file<-"./data/H1_5kb_stub_ENSG_tbl.Rda"
+background_gene_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
+foreground_gene_file<-"./data/GM12878_50kb_hub_ENSG_tbl.Rda"
 
-out_file<-"./data/H1_5kb_stub_CAGE_GOBP_enrich_tbl.Rda"
+out_file<-"./data/GM12878_hub_5kb_stub_CAGE_GOBP_enrich_tbl.Rda"
 
 gene_conv_tbl_file<-"./data/gene_name_conv_tbl.Rda"
 
@@ -66,6 +66,8 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 
 
 path_tbl<-GO_set_enrich_fn(foreground_gene_vec,background_gene_vec,Gene_set_l)
-path_tbl %>% filter(FDR<=0.01) %>% arrange(FDR) %>% arrange(desc(OR))
+print(path_tbl %>% 
+  filter(FDR<=0.01) %>% 
+  arrange(FDR),n=100)
 save(path_tbl,file=out_file)
 
