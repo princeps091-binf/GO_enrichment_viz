@@ -5,13 +5,17 @@ library(org.Hs.eg.db)
 library(seriation)
 library(viridis)
 library(ggridges)
-gene_set_enrich_tbl_file<-"./data/hub_5kb_GM12878_CAGE_GOBP_enrich_tbl.Rda"
-gene_set_enrich_tbl<-get(load(gene_set_enrich_tbl_file))
-tmp_obj<-names(mget(load(gene_set_enrich_tbl_file)))
-rm(list=tmp_obj)
-rm(tmp_obj)
-
-gene_set_enrich_tbl %>% filter(FDR<=0.01) %>% arrange(FDR)
+#------------------------------
+get_obj_in_fn<-function(file){
+  out_tbl<-get(load(file))
+  tmp_obj<-names(mget(load(file)))
+  rm(list=tmp_obj)
+  rm(tmp_obj)
+  return(out_tbl)
+}
+#------------------------------
+gene_set_enrich_tbl_file<-"./data/GM12878_5kb_tss_compound_hub_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl<-get_obj_in_fn(gene_set_enrich_tbl_file)
 
 
 cl_set_combo_tbl<-gene_set_enrich_tbl %>% 
@@ -19,7 +23,8 @@ cl_set_combo_tbl<-gene_set_enrich_tbl %>%
 
 hm_gene_set<-as_tibble(read.table("~/Documents/multires_bhicect/data/epi_data/Gene_annotation/c5.all.v7.3.entrez.gmt",header = F,sep = "\t",fill=T))
 
-cl_set_combo_tbl<-cl_set_combo_tbl %>%   left_join(.,hm_gene_set%>%dplyr::select(V1,V2),by=c("Gene.Set" = "V1"))
+cl_set_combo_tbl<-cl_set_combo_tbl %>%   
+  left_join(.,hm_gene_set%>%dplyr::select(V1,V2),by=c("Gene.Set" = "V1"))
 
 
 
@@ -42,7 +47,7 @@ simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
 
 library(seriation)
 d<-as.dist(1/(simMatrix+1e-3))
-order <- seriate(d,method = "HC")
+order <- seriate(d,method = "OLO")
 image(simMatrix[get_order(order),get_order(order)])
 
 library(igraph)
@@ -64,9 +69,9 @@ sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
 }))
 
 
-cl_set_combo_tbl %>% 
-  inner_join(comm_edge_tbl %>% filter(x==5) %>% 
-  summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR)
+print(cl_set_combo_tbl %>% 
+  inner_join(comm_edge_tbl %>% filter(x==6) %>% 
+  summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR),n = 100)
 
 sim_tbl %>% 
   ggplot(.,aes(x=w,y=as.factor(GO.set),fill=as.factor(GO.set)))+
@@ -76,14 +81,14 @@ sim_tbl %>%
 cl_set_combo_tbl %>% 
   inner_join(comm_edge_tbl %>% group_by(x) %>% 
                summarise(GO.ID=unique(c(ego,alter)))) %>% 
-  rename(set=x) %>% 
+  dplyr::rename(set=x) %>% 
   ggplot(.,aes(x=-log10(FDR),y=as.factor(set)))+
   geom_density_ridges()
 
 cl_set_combo_tbl %>% 
   inner_join(comm_edge_tbl %>% group_by(x) %>% 
                summarise(GO.ID=unique(c(ego,alter)))) %>% 
-  rename(set=x) %>% 
+  dplyr::rename(set=x) %>% 
   ggplot(.,aes(x=OR,y=as.factor(set)))+
   geom_density_ridges()
 #---------------------------------------------------
