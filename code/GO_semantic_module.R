@@ -14,7 +14,7 @@ get_obj_in_fn<-function(file){
   return(out_tbl)
 }
 #------------------------------
-gene_set_enrich_tbl_file<-"./data/GM12878_5kb_tss_compound_hub_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl_file<-"./data/HMEC_5kb_tss_compound_hub_GOBP_enrich_tbl.Rda"
 gene_set_enrich_tbl<-get_obj_in_fn(gene_set_enrich_tbl_file)
 
 
@@ -47,21 +47,22 @@ simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
 
 library(seriation)
 d<-as.dist(1/(simMatrix+1e-3))
-order <- seriate(d,method = "OLO")
+order <- seriate(d,method = "HC")
 image(simMatrix[get_order(order),get_order(order)])
 
 library(igraph)
-main_sub_g<-graph_from_adjacency_matrix(simMatrix,mode = "undirected",weighted = T)
+main_sub_g<-graph_from_adjacency_matrix(simMatrix,mode = "undirected",weighted = T,diag = F)
 louvain_sample_cluster<-cluster_louvain(main_sub_g)
 
-sample_comm<-unique(louvain_sample_cluster$membership)
+sample_comm<-unique(sample_greedy_cluster$membership)
+
 comm_edge_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
-  tmp_v<-V(main_sub_g)$name[which(cluster_louvain(main_sub_g)$membership==i)]
+  tmp_v<-V(main_sub_g)$name[which(louvain_sample_cluster$membership==i)]
   expand_grid(ego=tmp_v,alter=tmp_v) %>% mutate(x=i)
 }))
 tmp_mat<-matrix(0,nrow = nrow(simMatrix),ncol=ncol(simMatrix),dimnames = dimnames(simMatrix))
 tmp_mat[as.matrix(comm_edge_tbl[,1:2])]<-comm_edge_tbl$x
-image(tmp_mat[get_order(order),get_order(order)],col=plasma(9))
+image(tmp_mat[get_order(order),get_order(order)],col=plasma(length(sample_comm)+1))
 
 sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
   tmp_w<-E(induced_subgraph(main_sub_g,louvain_sample_cluster$names[which(louvain_sample_cluster$membership==i)]))$weight
@@ -70,7 +71,7 @@ sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
 
 
 print(cl_set_combo_tbl %>% 
-  inner_join(comm_edge_tbl %>% filter(x==6) %>% 
+  inner_join(comm_edge_tbl %>% filter(x==1) %>% 
   summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR),n = 100)
 
 sim_tbl %>% 
