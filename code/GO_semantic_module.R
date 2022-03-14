@@ -47,14 +47,14 @@ simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
 
 library(seriation)
 d<-as.dist(1/(simMatrix+1e-3))
-order <- seriate(d,method = "HC")
+order <- seriate(d,method = "OLO")
 image(simMatrix[get_order(order),get_order(order)])
 
 library(igraph)
 main_sub_g<-graph_from_adjacency_matrix(simMatrix,mode = "undirected",weighted = T,diag = F)
 louvain_sample_cluster<-cluster_louvain(main_sub_g)
 
-sample_comm<-unique(sample_greedy_cluster$membership)
+sample_comm<-unique(louvain_sample_cluster$membership)
 
 comm_edge_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
   tmp_v<-V(main_sub_g)$name[which(louvain_sample_cluster$membership==i)]
@@ -71,7 +71,7 @@ sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
 
 
 print(cl_set_combo_tbl %>% 
-  inner_join(comm_edge_tbl %>% filter(x==1) %>% 
+  inner_join(comm_edge_tbl %>% filter(x==4) %>% 
   summarise(GO.ID=unique(c(ego,alter)))) %>% arrange(FDR),n = 100)
 
 sim_tbl %>% 
@@ -98,6 +98,23 @@ semantic_module_content_tbl<-comm_edge_tbl %>% group_by(x) %>%
   summarise(GO.ID=list(unique(c(ego,alter)))) %>% 
   dplyr::rename(sem.mod=x)
 
+semantic_module_content_tbl<-semantic_module_content_tbl %>% 
+  mutate(GO.tbl=map(GO.ID,function(x){
+    return(cl_set_combo_tbl %>% filter(GO.ID %in% x) %>% dplyr::select(GO.ID,Gene.Set,FDR,OR))
+  })) %>% 
+  mutate(entrez.content=map(GO.ID,function(x){
+    tmp_names<-cl_set_combo_tbl %>% filter(GO.ID %in% x) %>% dplyr::select(Gene.Set) %>% unlist
+    return(hm_gene_set %>% 
+      filter(V1 %in% tmp_names) %>% 
+      dplyr::select(-V2) %>% 
+      pivot_longer(!V1, names_to="gene.id",values_to = "entrez.id") %>% 
+      dplyr::select(-gene.id) %>% 
+      distinct(entrez.id) %>% unlist %>% as.character)
+    
+  }))
+
+save(semantic_module_content_tbl,file="./data/semantic_module_tbl/HMEC_semantic_module_tbl.Rda")
+
 sem_mod_gene_l<-lapply(semantic_module_content_tbl$GO.ID,function(i){
   tmp_names<-cl_set_combo_tbl %>% filter(GO.ID %in% i) %>% dplyr::select(Gene.Set) %>% unlist
   hm_gene_set %>% 
@@ -112,4 +129,4 @@ sem_mod_gene_l<-lapply(semantic_module_content_tbl$GO.ID,function(i){
 
 library(UpSetR)
 names(sem_mod_gene_l)<-paste0("module.",1:length(sem_mod_gene_l))
-upset(fromList(sem_mod_gene_l),order.by = "freq")
+upset(fromList(sem_mod_gene_l),order.by = "freq",nsets = length(sample_comm))
