@@ -57,11 +57,11 @@ for (chromo in chr_set){
   
 }
 
-grange_tbl<-do.call(bind_rows,chr_res_l)
+top_compound_hub_5kb_tbl<-do.call(bind_rows,chr_res_l)
 
-grange_tbl<-grange_tbl %>% 
+top_compound_hub_5kb_tbl<-top_compound_hub_5kb_tbl %>% 
   mutate(ENSG.content=future_map(GRange,function(x){
     return(unique(unlist(gene_GRange@elementMetadata$ENSG[unique(subjectHits(findOverlaps(x,gene_GRange)))])))
   }))
-hub_gene_tbl
-save(grange_tbl,file=out_file)
+top_compound_hub_5kb_tbl
+save(top_compound_hub_5kb_tbl,file=out_file)
