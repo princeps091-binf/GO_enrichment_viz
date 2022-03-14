@@ -15,13 +15,13 @@ get_obj_in_fn<-function(file){
   return(out_tbl)
 }
 #-------------------------------------------------------------------
-cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/candidate_compound_hub/GM12878_5kb_tss_compound_hub.Rda"
+cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/candidate_compound_hub/HMEC_5kb_tss_compound_hub.Rda"
 
-cl_spec_res_folder<-"~/Documents/multires_bhicect/data/GM12878/spec_res/"
+cl_spec_res_folder<-"~/Documents/multires_bhicect/data/HMEC/spec_res/"
 
-gene_GRange_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
+gene_GRange_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
 
-out_file<-paste0("./data/GM12878_5kb_top_compound_hub_ENSG_tbl.Rda")
+out_file<-paste0("./data/HMEC_5kb_top_compound_hub_ENSG_tbl.Rda")
 
 cl_tbl<-get_obj_in_fn(cl_tbl_file)
 
