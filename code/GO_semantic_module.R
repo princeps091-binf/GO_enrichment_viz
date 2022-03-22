@@ -14,7 +14,7 @@ get_obj_in_fn<-function(file){
   return(out_tbl)
 }
 #------------------------------
-gene_set_enrich_tbl_file<-"./data/HMEC_5kb_tss_compound_hub_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl_file<-"./data/HMEC_TAD_GOBP_enrich_tbl.Rda"
 gene_set_enrich_tbl<-get_obj_in_fn(gene_set_enrich_tbl_file)
 
 
@@ -47,7 +47,7 @@ simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
 
 library(seriation)
 d<-as.dist(1/(simMatrix+1e-3))
-order <- seriate(d,method = "OLO")
+order <- seriate(d,method = "HC")
 image(simMatrix[get_order(order),get_order(order)])
 
 library(igraph)
