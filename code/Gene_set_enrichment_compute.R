@@ -34,10 +34,10 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 }
 
 #------------------------------
-background_gene_file<-"./data/CAGE_GM12878_gene_GRange.Rda"
-foreground_gene_file<-"./data/GM12878_5kb_tss_compound_hub_ENSG_tbl.Rda"
+background_gene_file<-"./data/CAGE_H1_gene_GRange.Rda"
+foreground_gene_file<-"./data/TAD_H1_CAGE_rich_GRange.Rda"
 
-out_file<-"./data/GM12878_5kb_tss_compound_hub_GOBP_enrich_tbl.Rda"
+out_file<-"./data/H1_TAD_GOBP_enrich_tbl.Rda"
 
 gene_conv_tbl_file<-"./data/gene_name_conv_tbl.Rda"
 
