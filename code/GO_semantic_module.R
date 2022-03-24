@@ -14,7 +14,7 @@ get_obj_in_fn<-function(file){
   return(out_tbl)
 }
 #------------------------------
-gene_set_enrich_tbl_file<-"./data/HMEC_TAD_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl_file<-"./data/HMEC_5kb_compound_top_hub_GOBP_enrich_tbl.Rda"
 gene_set_enrich_tbl<-get_obj_in_fn(gene_set_enrich_tbl_file)
 
 
@@ -47,8 +47,12 @@ simMatrix <- calculateSimMatrix(cl_set_combo_tbl$GO.ID,
 
 library(seriation)
 d<-as.dist(1/(simMatrix+1e-3))
-order <- seriate(d,method = "HC")
+order <- seriate(d,method = "OLO")
 image(simMatrix[get_order(order),get_order(order)])
+png("~/Documents/multires_bhicect/weeklies/weekly53/img/HMEC_GO_semantic_distance.png",width=50,height=50,units = "mm",res=1000)
+par(mar=c(0,0,0,0))
+image(simMatrix[get_order(order),get_order(order)])
+dev.off()
 
 library(igraph)
 main_sub_g<-graph_from_adjacency_matrix(simMatrix,mode = "undirected",weighted = T,diag = F)
@@ -62,7 +66,11 @@ comm_edge_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
 }))
 tmp_mat<-matrix(0,nrow = nrow(simMatrix),ncol=ncol(simMatrix),dimnames = dimnames(simMatrix))
 tmp_mat[as.matrix(comm_edge_tbl[,1:2])]<-comm_edge_tbl$x
+
+png("~/Documents/multires_bhicect/weeklies/weekly53/img/HMEC_GO_semantic_module.png",width=50,height=50,units = "mm",res=1000)
+par(mar=c(0,0,0,0))
 image(tmp_mat[get_order(order),get_order(order)],col=plasma(length(sample_comm)+1))
+dev.off()
 
 sim_tbl<-do.call(bind_rows,lapply(sample_comm,function(i){
   tmp_w<-E(induced_subgraph(main_sub_g,louvain_sample_cluster$names[which(louvain_sample_cluster$membership==i)]))$weight
