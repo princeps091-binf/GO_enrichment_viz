@@ -35,7 +35,7 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 
 #------------------------------
 background_gene_file<-"./data/CAGE_HMEC_gene_GRange.Rda"
-foreground_gene_file<-"./data/TAD_HMEC_CAGE_rich_GRange.Rda"
+foreground_gene_file<-"./data/HMEC_poisson_hub_ENSG_tbl.Rda"
 
 out_file<-"./data/HMEC_TAD_GOBP_enrich_tbl.Rda"
 
@@ -55,9 +55,10 @@ Gene_set_l<-get_obj_in_fn(gene_set_file)
 
 cage_active_gene<-unique(unlist(mcols(background_GRange)$ENSG))
 
-foreground_gene_vec<-foreground_gene_tbl %>% dplyr::select(ENSG) %>% 
-  unnest(cols=c(ENSG)) %>% distinct() %>% 
-  inner_join(.,gene_conv_tbl,by=c("ENSG"="ensembl_gene_id")) %>% 
+foreground_gene_vec<-foreground_gene_tbl %>% 
+  dplyr::select(ENSG.content) %>% 
+  unnest(cols=c(ENSG.content)) %>% distinct() %>% 
+  inner_join(.,gene_conv_tbl,by=c("ENSG.content"="ensembl_gene_id")) %>% 
   distinct(entrezgene_id) %>% unlist %>% as.character
 
 background_gene_vec<-gene_conv_tbl%>%
@@ -70,6 +71,6 @@ background_gene_vec<-gene_conv_tbl%>%
 path_tbl<-GO_set_enrich_fn(foreground_gene_vec,background_gene_vec,Gene_set_l)
 print(path_tbl %>% 
   filter(FDR<=0.01) %>% 
-  arrange(FDR),n=100)
+  arrange(FDR),n=154)
 save(path_tbl,file=out_file)
 
