@@ -44,7 +44,7 @@ gene_set_file<-"./data/GOBP_gene_set_l.Rda"
 
 background_GRange<-get_obj_in_fn(background_gene_file)
 
-foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file)
+foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file) #%>% filter(res!="5kb")
 
 Gene_set_l<-get_obj_in_fn(gene_set_file)
 
@@ -59,5 +59,6 @@ path_tbl<-GO_set_enrich_fn(foreground_gene_vec,background_gene_vec,Gene_set_l)
 print(path_tbl %>% 
         filter(FDR<=0.01) %>% 
         arrange(FDR),n=154)
-save(path_tbl,file=out_file)
+
+#save(path_tbl,file=out_file)
 
