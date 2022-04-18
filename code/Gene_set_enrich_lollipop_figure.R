@@ -3,7 +3,7 @@ renv::install("svglite")
 
 library(tidyverse)
 library(svglite)
-gene_set_enrich_tbl_file<-"./data/hub_mres_HMEC_CAGE_rich_GOBP_enrich_tbl.Rda"
+gene_set_enrich_tbl_file<-"./data/trans_res_hub_GS_tbl/H1_trans_res_hub_entrez_GOBP_enrich_tbl.Rda"
 
 gene_set_enrich_tbl<-get(load(gene_set_enrich_tbl_file))
 tmp_obj<-names(mget(load(gene_set_enrich_tbl_file)))
@@ -17,4 +17,6 @@ gg_pop<-gene_set_enrich_tbl %>%
   mutate(Gene.Set=fct_reorder(Gene.Set,-log10(FDR))) %>% 
   ggplot(.,aes(-log10(FDR),Gene.Set,size=OR))+
   geom_point()+theme_minimal()
-ggsave("~/Documents/multires_bhicect/weeklies/IFI_meeting/img/HMEC_hub_mres_GOBP_lilopop.svg")
+gg_pop
+
+ggsave("~/Documents/multires_bhicect/weeklies/group_meeting/group_meeting_04_2022/img/H1_hub_tres_GOBP_lilopop.svg",width = 40,height=35,units = "cm")
