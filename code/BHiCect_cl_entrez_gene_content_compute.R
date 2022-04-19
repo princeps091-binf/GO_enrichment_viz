@@ -15,13 +15,14 @@ get_obj_in_fn<-function(file){
   return(out_tbl)
 }
 #-------------------------------------------------------------------
-cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/GM12878_union_trans_res_dagger_tbl.Rda"
+#cl_tbl_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/GM12878_union_trans_res_dagger_tbl.Rda"
+cl_tbl_file<-"~/Documents/multires_bhicect/BHiCect_poisson_cluster_detect/data/pval_tbl/DAGGER/HMEC_poisson_DAGGER_05.Rda"
 
-cl_spec_res_folder<-"~/Documents/multires_bhicect/data/GM12878/spec_res/"
+cl_spec_res_folder<-"~/Documents/multires_bhicect/data/HMEC/spec_res/"
 
-gene_GRange_file<-"./data/CAGE_GM12878_entrez_gene_GRange.Rda"
+gene_GRange_file<-"./data/CAGE_HMEC_entrez_gene_GRange.Rda"
 
-out_file<-paste0("./data/GM12878_trans_res_hub_entrez_tbl.Rda")
+out_file<-paste0("./data/HMEC_poisson_05_hub_entrez_tbl.Rda")
 
 cl_tbl<-get_obj_in_fn(cl_tbl_file)
 
