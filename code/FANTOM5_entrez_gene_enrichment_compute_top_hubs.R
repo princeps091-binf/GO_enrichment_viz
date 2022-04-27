@@ -1,6 +1,5 @@
 library(tidyverse)
 library(GenomicRanges)
-library(rjson)
 #------------------------------
 get_obj_in_fn<-function(file){
   out_tbl<-get(load(file))
@@ -9,6 +8,7 @@ get_obj_in_fn<-function(file){
   rm(tmp_obj)
   return(out_tbl)
 }
+
 GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
   fn_env<-environment()
   
@@ -34,47 +34,37 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 }
 
 #------------------------------
-background_gene_file<-"./data/CAGE_H1_entrez_gene_GRange.Rda"
-foreground_gene_file<-"./data/H1_trans_res_hub_entrez_tbl.Rda"
+background_gene_file<-"./data/CAGE_GM12878_entrez_gene_GRange.Rda"
+foreground_gene_file<-"./data/GM12878_trans_res_hub_entrez_tbl.Rda"
 
-out_file<-"./data/trans_res_hub_GS_tbl/HMEC_trans_res_hub_entrez_GOBP_enrich_tbl.Rda"
+top_hub_file<-"~/Documents/multires_bhicect/Bootstrapp_fn/data/DAGGER_tbl/trans_res/GM12878_union_top_trans_res_dagger_tbl.Rda"
 
-gene_set_file<-"./data/GOBP_gene_set_l.Rda"
+out_file<-"./data/trans_res_hub_GS_tbl/H1_trans_res_hub_entrez_GOBP_enrich_tbl.Rda"
 
+gene_set_file<-"./data/Hallmark_gene_set_l.Rda"
 
-result <- fromJSON(file = "./data/MSigDB_tbl/c5.go.bp.v7.5.1.json")
-GO_ID_map_vec<-map_chr(result,function(x){
-  x$exactSource
-})
 
 background_GRange<-get_obj_in_fn(background_gene_file)
 
-foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file) %>% 
-#  filter(!(res%in% c("1Mb","500kb","100kb")))
-#  filter(!(res %in% c("5kb","10kb")))
-  filter(res %in% c("100kb"))
+foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file) 
+
+top_hub_tbl<-get_obj_in_fn(top_hub_file)
+
+foreground_gene_tbl<-foreground_gene_tbl %>% 
+  inner_join(.,top_hub_tbl)
+
+res_foreground_gene_tbl<-foreground_gene_tbl#  %>% filter(res=="500kb")
+
 Gene_set_l<-get_obj_in_fn(gene_set_file)
 
-foreground_gene_vec<-unique(unlist(foreground_gene_tbl$entrez.content))
+foreground_gene_vec<-unique(unlist(res_foreground_gene_tbl$entrez.content))
 
 background_gene_vec<-unique(unlist(mcols(background_GRange)$entrez))
-
-#hg19_vec<-gene_conv_tbl %>% distinct(entrezgene_id) %>% unlist
 
 
 path_tbl<-GO_set_enrich_fn(foreground_gene_vec,background_gene_vec,Gene_set_l)
 print(path_tbl %>% 
         filter(FDR<=0.01) %>% 
-#        arrange(desc(OR))
-              arrange(FDR)
+        arrange(desc(OR))
+      #        arrange(FDR)
       ,n=100)
-#------------------------------------------------
-cand_GO<-path_tbl %>% 
-  filter(FDR<=0.01) %>%
-  dplyr::select(Gene.Set) %>% 
-  unlist
-cand_GO_ID<-GO_ID_map_vec[cand_GO]
-library(simplifyEnrichment)
-
-mat <- GO_similarity(cand_GO_ID,measure="Resnik",ont = "BP")
-df <- simplifyGO(mat)
