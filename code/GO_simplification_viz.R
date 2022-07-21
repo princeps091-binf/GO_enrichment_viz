@@ -1,5 +1,6 @@
 library(tidyverse)
 library(GenomicRanges)
+library(parallel)
 library(rjson)
 #------------------------------
 get_obj_in_fn<-function(file){
@@ -35,7 +36,7 @@ GO_set_enrich_fn<-function(cl_set_gene,cage_active_genes_vec,GOBP_set){
 
 #------------------------------
 background_gene_file<-"./data/CAGE_H1_entrez_gene_GRange.Rda"
-foreground_gene_file<-"./data/H1_trans_res_hub_entrez_tbl.Rda"
+foreground_gene_file<-"./data/H1_trans_res_CAGE_top_hub_entrez_tbl.Rda"
 
 out_file<-"./data/trans_res_hub_GS_tbl/HMEC_trans_res_hub_entrez_GOBP_enrich_tbl.Rda"
 
@@ -49,10 +50,8 @@ GO_ID_map_vec<-map_chr(result,function(x){
 
 background_GRange<-get_obj_in_fn(background_gene_file)
 
-foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file) %>% 
-#  filter(!(res%in% c("1Mb","500kb","100kb")))
-#  filter(!(res %in% c("5kb","10kb")))
-  filter(res %in% c("100kb"))
+foreground_gene_tbl<-get_obj_in_fn(foreground_gene_file)
+
 Gene_set_l<-get_obj_in_fn(gene_set_file)
 
 foreground_gene_vec<-unique(unlist(foreground_gene_tbl$entrez.content))
